@@ -33,10 +33,12 @@ public class Node
     public Color NodeColor { get; set; }
     public int Connected { get; set; }
     public int nodeType { get; set; }
+    public int ID { get; set; }
 }
 
 public class Edge
 {
+    public int edgeType { get; set; }
     public Node LeftNode { get; set; }
     public Node RightNode { get; set; }
     public Color EdgeColor { get; set; }

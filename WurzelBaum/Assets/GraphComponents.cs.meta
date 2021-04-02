@@ -4,9 +4,25 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - empty: {fileID: 1915345402418116834, guid: 311aff93d3099ce4e86b93501e3151ce, type: 3}
-  - cube: {fileID: 2157342505584668947, guid: 7e180ac1e9ecb324ea64816301045fc9, type: 3}
-  - sphere: {fileID: 6166849353190778187, guid: 587211ef97067d746ad5dc28b229dd6e, type: 3}
+  - cube0: {fileID: 8089325404979795867, guid: 134878aef24a3bc4cb8062b68fe490f9, type: 3}
+  - cube1: {fileID: 3591383395059029620, guid: 8352133accb9769429beb1a13357a6f6, type: 3}
+  - cube2: {fileID: 2858140704068844583, guid: c26d1e4b1603c794b8ea21b2d2bb829c, type: 3}
+  - cube3: {fileID: 2925924676076207232, guid: b5103af17f351b94d8b33824e31b0e5a, type: 3}
+  - sphere0: {fileID: 6127345370844096954, guid: c86199c6d2130d24bb208db0f62224e1, type: 3}
+  - sphere1: {fileID: 1921413000123840656, guid: 20c48e6a5705052489598511b2a807f8, type: 3}
+  - sphere2: {fileID: 6035420848096257324, guid: 2429cca9be7732548805a78648730d3f, type: 3}
+  - sphere3: {fileID: 11050285135536286, guid: 2658d2192d4693744b820d8ad78ab293, type: 3}
+  - triang0: {fileID: 4007987084527713655, guid: 3340849071d84084499994f5563128a9, type: 3}
+  - triang1: {fileID: 3371472919674308636, guid: 6a2fb9c1975744c47a9a4300cf35a54f, type: 3}
+  - triang2: {fileID: 6717424564487690851, guid: 9e34cd3b878875b4a9352531712a5c1a, type: 3}
+  - triang3: {fileID: 8023287508023607564, guid: 3a48c9be381095147a9c89b8f67aa9fc, type: 3}
+  - Cylinder: {fileID: 749749009166257950, guid: 4ee51bdb228334341ac54ead2415034f, type: 3}
+  - Cylinder0: {fileID: 7029794643090765227, guid: 701d3cce74c12e34bba851498e9f8a66, type: 3}
+  - Cylinder1: {fileID: 6824203174359132192, guid: 872aee5c64740c546a5d9a3201f26dea, type: 3}
+  - Cylinder2: {fileID: 8699825636255263803, guid: 92060e15362c3514995a164375bc786c, type: 3}
+  - Cylinder3: {fileID: 2602718057413626576, guid: 5a292e171c9f13343bda5d2532b3e358, type: 3}
+  - Cylinder4: {fileID: 8914048965618574522, guid: 8a4ba9638dd269e4ab81673700614198, type: 3}
+  - Cylinder5: {fileID: 7873454994788502969, guid: 9b86c1d0351a58e4dab5ecd62592e7f1, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
