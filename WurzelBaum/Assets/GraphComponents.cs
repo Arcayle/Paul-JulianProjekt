@@ -6,11 +6,15 @@ using UnityEngine;
 public class GraphComponents : MonoBehaviour
 {
     public GameObject cube0, cube1, cube2, cube3, sphere0, sphere1, sphere2, sphere3, triang0, triang1, triang2, triang3, Cylinder, Cylinder0, Cylinder1, Cylinder2, Cylinder3, Cylinder4, Cylinder5;
+    public GameObject Cylindernew, Cylinder0new, Cylinder1new, Cylinder2new, Cylinder3new, Cylinder4new, Cylinder5new;
     public GameObject camera;
     private Graph graph;
-    public int IDcounter = 0;
-    public int currentLayer = 0;
-    public int mymethod()
+    public int IDcounter = -1;
+    public float currentLayer = 1;
+    public int lastselected;
+    public int counter = 1;
+
+    public int mymethod() 
     {
         IDcounter += 1;
         return IDcounter;
@@ -18,13 +22,88 @@ public class GraphComponents : MonoBehaviour
     public void moveCam()
     {
         currentLayer += 1;
+        Debug.Log("Current hoch");
+        
     }
+    public bool validClick(int ID)
+    {     
+        foreach (Edge edge in graph.Edges)
+        {
+            
+            if (edge.LeftNode.ID== ID)
+            {
+                Debug.Log("---");
+                Debug.Log(edge.LeftNode.ID);
+                Debug.Log(edge.RightNode.ID);
+                Debug.Log("---");
+                if (edge.RightNode.ID == lastselected)
+                {
+                    
+                    lastselected = ID;
+                    var temp1 = edge.LeftNode.NodePos;
+                    var temp2 = edge.RightNode.NodePos;
+                    if (temp1[1] > temp2[1])
+                    {
+                        temp2 = edge.LeftNode.NodePos;
+                        temp1 = edge.RightNode.NodePos;
+                    }
+                    var diff = temp1[0] - temp2[0];
+
+                    if (0.01f > diff && diff > -0.01f) { Instantiate(Cylindernew, temp1, Quaternion.identity);}
+                    else if (0.01f + 0.5f > diff && diff > -0.01f + 0.5f) { Instantiate(Cylinder3new, temp1, Quaternion.identity);}
+                    else if (0.01f + 1 > diff && diff > -0.01f + 1) { Instantiate(Cylinder4new, temp1, Quaternion.identity);}
+                    else if (0.01f + 1.5 > diff && diff > -0.01f + 1.5) { Instantiate(Cylinder5new, temp1, Quaternion.identity);}
+                    else if (0.01f - 0.5f > diff && diff > -0.01f - 0.5f) { Instantiate(Cylinder0new, temp1, Quaternion.identity);}
+                    else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1new, temp1, Quaternion.identity);}
+                    else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2new, temp1, Quaternion.identity);}
+                        return true;
+                }
+            }
+            else if(edge.RightNode.ID == ID)
+            {
+                Debug.Log("---");
+                Debug.Log(edge.LeftNode.ID);
+                Debug.Log(edge.RightNode.ID);
+                Debug.Log("---");
+                if (edge.LeftNode.ID ==lastselected)
+                {
+                    lastselected = ID;
+
+                    var temp1 = edge.LeftNode.NodePos;
+                    var temp2 = edge.RightNode.NodePos;
+                    if (temp1[1] > temp2[1])
+                    {
+                        temp2 = edge.LeftNode.NodePos;
+                        temp1 = edge.RightNode.NodePos;
+                    }
+                    var diff = temp1[0] - temp2[0];
+
+                    if (0.01f > diff && diff > -0.01f) { Instantiate(Cylindernew, temp1, Quaternion.identity);}
+                    else if (0.01f + 0.5f > diff && diff > -0.01f + 0.5f) { Instantiate(Cylinder3new, temp1, Quaternion.identity);}
+                    else if (0.01f + 1 > diff && diff > -0.01f + 1) { Instantiate(Cylinder4new, temp1, Quaternion.identity);}
+                    else if (0.01f + 1.5 > diff && diff > -0.01f + 1.5) { Instantiate(Cylinder5new, temp1, Quaternion.identity);}
+                    else if (0.01f - 0.5f > diff && diff > -0.01f - 0.5f) { Instantiate(Cylinder0new, temp1, Quaternion.identity);}
+                    else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1new, temp1, Quaternion.identity);}
+                    else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2new, temp1, Quaternion.identity);}
+
+
+                    return true;
+                }
+            }
+        }
+   
+        return false;
+    
+
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        camera.transform.position = new Vector3(0, 0.5f, -2);
-        currentLayer = 0;
-        IDcounter = 0;
+        
+        camera.transform.position = new Vector3(0, 0f, -2);
+        currentLayer = 0.5f;
+        IDcounter = -1;
         GameObject[] allObjects = GameObject.FindGameObjectsWithTag("clone");
         foreach (GameObject obj in allObjects)
         {
@@ -41,10 +120,11 @@ public class GraphComponents : MonoBehaviour
         int nodeType=0;
         int color = 0;
         graph = new Graph();
-        var node_start = new Node() { NodeColor = Color.green, NodePos = Vector2.zero };
+        var node_start = new Node() { ID = 0 ,NodeColor = Color.magenta, nodeType = Random.Range(0, 3), NodePos = Vector2.zero };
         graph.Nodes.Add(node_start);
+        lastselected = 0;
         // create nodes layer wise and store layers
-        int counter = 0;
+        int counter = 1;
         for (var i = 1; i < N_layers; i++)
         {
             int rValue = Random.Range(0,100);   
@@ -66,7 +146,7 @@ public class GraphComponents : MonoBehaviour
                 }
                 else
                 {
-                    var temp = new Node() { nodeType = Random.Range(0, 3), NodeColor = colorlist[Random.Range(0,4)], NodePos = new Vector2((float)j-0.5f*(N_nodes-1)+Random.Range(-1,2)*0.0f, i + Random.Range(-1, 2) * 0.0f) };
+                    var temp = new Node() { ID = counter, nodeType = Random.Range(0, 3), NodeColor = colorlist[Random.Range(0,4)], NodePos = new Vector2((float)j-0.5f*(N_nodes-1)+Random.Range(-1,2)*0.0f, i + Random.Range(-1, 2) * 0.0f) };
                     NodesInLayer.Add(temp);
                     graph.Nodes.Add(temp);
                 }
@@ -74,7 +154,7 @@ public class GraphComponents : MonoBehaviour
             }
             graph.Layers.Add(NodesInLayer);
         }
-        var node_end = new Node() { NodeColor = Color.green, NodePos = new Vector2(0,N_layers) };
+        var node_end = new Node() { ID = counter, nodeType = Random.Range(0, 3), NodeColor = Color.blue, NodePos = new Vector2(0,N_layers) };
         graph.Nodes.Add(node_end);
         // create edges layer wise from bottom up
         foreach (Node node in graph.Layers[0])
@@ -311,6 +391,22 @@ public class GraphComponents : MonoBehaviour
             else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1, temp1, Quaternion.identity); }
             else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2, temp1, Quaternion.identity); }
         }
+        
+        foreach (Node node in graph.Nodes)
+        {
+            Debug.Log("---");
+            Debug.Log(node.ID);
+            Debug.Log("---");
+        }
+        /*
+        foreach (Edge edge in graph.Edges)
+        {
+            Debug.Log("---");
+            Debug.Log(edge.LeftNode.ID);
+            Debug.Log(edge.RightNode.ID);
+            Debug.Log("---");
+        }
+        */
     }
 
 
@@ -323,6 +419,7 @@ public class GraphComponents : MonoBehaviour
         }
         if (camera.transform.position.y < currentLayer)
         {
+
             camera.transform.position = new Vector3(0, camera.transform.position.y+Time.deltaTime, -2);
         }
         else

@@ -5,7 +5,7 @@ using UnityEngine;
 public class nodeID : MonoBehaviour
 {
     //public GraphComponents otherscript;
-    public int ID { get; set; }
+    public int ID;
     // Start is called before the first frame update
     void Start()
     {

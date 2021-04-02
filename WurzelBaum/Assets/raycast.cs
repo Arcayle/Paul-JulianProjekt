@@ -5,10 +5,11 @@ using UnityEngine;
 public class raycast : MonoBehaviour
 {
     public nodeID nodeID_script;
+    private GameObject mainscript;
     // Start is called before the first frame update
     void Start()
     {
-        
+        mainscript= GameObject.FindGameObjectsWithTag("mainscript")[0];
     }
 
     // Update is called once per frame
@@ -24,7 +25,16 @@ public class raycast : MonoBehaviour
                 // do whatever you want
                 var obj = hit.transform;
                 nodeID_script = obj.GetComponent<nodeID>();
-                GameObject.FindGameObjectsWithTag("mainscript")[0].GetComponent<GraphComponents>().moveCam();
+                
+                if (mainscript.GetComponent<GraphComponents>().validClick(nodeID_script.ID)==true)
+                {
+                    
+                    mainscript.GetComponent<GraphComponents>().moveCam();
+                    
+                }
+              
+                else { Debug.Log("Invalid Target"); }
+                Debug.Log(nodeID_script.ID);
             }
         }
     }
