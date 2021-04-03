@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [ExecuteInEditMode]
 public class GraphComponents : MonoBehaviour
@@ -13,7 +14,7 @@ public class GraphComponents : MonoBehaviour
     public float currentLayer = 1;
     public int lastselected;
     public int counter = 1;
-    public List<Vector2> LoadNodePos, LoadEdges;
+    public List<Vector2> LoadNodePos, LoadEdges, LoadChosenEdges;
     public List<int> LoadNodeType;
     public string savenodes="";
     public string saveedges="", savechosenedges ="";
@@ -25,6 +26,7 @@ public class GraphComponents : MonoBehaviour
     public void moveCam()
     {
         currentLayer += 1;
+        PlayerPrefs.SetFloat("cam_pos", currentLayer);
     }
     public bool validClick(int ID)
     {     
@@ -36,6 +38,7 @@ public class GraphComponents : MonoBehaviour
                 if (connection[1] == lastselected)
                 {
                     lastselected = ID;
+                    PlayerPrefs.SetInt("lastselected", lastselected);
                     var temp1 = LoadNodePos[(int)connection[0]];
                     var temp2 = LoadNodePos[(int)connection[1]];
                     if (temp1[1] > temp2[1])
@@ -51,6 +54,8 @@ public class GraphComponents : MonoBehaviour
                     else if (0.01f - 0.5f > diff && diff > -0.01f - 0.5f) { Instantiate(Cylinder0new, temp1, Quaternion.identity);}
                     else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1new, temp1, Quaternion.identity);}
                     else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2new, temp1, Quaternion.identity);}
+                    savechosenedges = PlayerPrefs.GetString("chosenedgessaved") + System.Convert.ToString((int)connection[0]) + "," + System.Convert.ToString((int)connection[1]) + "_";
+                    PlayerPrefs.SetString("chosenedgessaved", savechosenedges);
                     return true;
                 }
             }
@@ -59,6 +64,7 @@ public class GraphComponents : MonoBehaviour
                 if (connection[0] ==lastselected)
                 {
                     lastselected = ID;
+                    PlayerPrefs.SetInt("lastselected", lastselected);
                     var temp1 = LoadNodePos[(int)connection[0]];
                     var temp2 = LoadNodePos[(int)connection[1]];
                     if (temp1[1] > temp2[1])
@@ -74,9 +80,13 @@ public class GraphComponents : MonoBehaviour
                     else if (0.01f - 0.5f > diff && diff > -0.01f - 0.5f) { Instantiate(Cylinder0new, temp1, Quaternion.identity);}
                     else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1new, temp1, Quaternion.identity);}
                     else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2new, temp1, Quaternion.identity);}
+                    savechosenedges = PlayerPrefs.GetString("chosenedgessaved") + System.Convert.ToString((int)connection[0]) + "," + System.Convert.ToString((int)connection[1]) + "_";
+                    PlayerPrefs.SetString("chosenedgessaved", savechosenedges);
+
                     return true;
                 }
             }
+
         }
         return false;
     }
@@ -87,17 +97,22 @@ public class GraphComponents : MonoBehaviour
     }
     void createGraph()
     {
+        PlayerPrefs.SetInt("lastselected", 0);
+        PlayerPrefs.SetFloat("cam_pos", 0.5f);
+        camera.transform.position = new Vector3(0, 0.5f, -2);
+        PlayerPrefs.SetString("chosenedgessaved", "");
         int N_layers = 10;
         List<Color> colorlist = new List<Color>();
         colorlist.Add(Color.blue);
         colorlist.Add(Color.red);
         colorlist.Add(Color.yellow);
         colorlist.Add(Color.magenta);
+        int Nnodetype = 12;
         bool SameNodes = false;
         int nodeType = 0;
         int color = 0;
         graph = new Graph();
-        var node_start = new Node() { ID = 0, NodeColor = Color.magenta, nodeType = Random.Range(0, 3), NodePos = Vector2.zero };
+        var node_start = new Node() { ID = 0, NodeColor = Color.magenta, nodeType = Random.Range(0, Nnodetype), NodePos = Vector2.zero };
         graph.Nodes.Add(node_start);
         lastselected = 0;
         // create nodes layer wise and store layers
@@ -111,7 +126,7 @@ public class GraphComponents : MonoBehaviour
             else N_nodes = 4;
             graph.NodesPerLayer.Add(N_nodes);
             List<Node> NodesInLayer = new List<Node>();
-            if (Random.Range(0, 5) == 1) { SameNodes = true; color = Random.Range(0, 4); nodeType = Random.Range(0, 3); }
+            if (Random.Range(0, 5) == 1) { SameNodes = true; color = Random.Range(0, 4); nodeType = Random.Range(0, Nnodetype); }
             else SameNodes = false;
             for (var j = 0; j < N_nodes; j++)
             {
@@ -123,7 +138,7 @@ public class GraphComponents : MonoBehaviour
                 }
                 else
                 {
-                    var temp = new Node() { ID = counter, nodeType = Random.Range(0, 3), NodeColor = colorlist[Random.Range(0, 4)], NodePos = new Vector2((float)j - 0.5f * (N_nodes - 1) + Random.Range(-1, 2) * 0.0f, i + Random.Range(-1, 2) * 0.0f) };
+                    var temp = new Node() { ID = counter, nodeType = Random.Range(0, Nnodetype), NodeColor = colorlist[Random.Range(0, 4)], NodePos = new Vector2((float)j - 0.5f * (N_nodes - 1) + Random.Range(-1, 2) * 0.0f, i + Random.Range(-1, 2) * 0.0f) };
                     NodesInLayer.Add(temp);
                     graph.Nodes.Add(temp);
                 }
@@ -131,7 +146,7 @@ public class GraphComponents : MonoBehaviour
             }
             graph.Layers.Add(NodesInLayer);
         }
-        var node_end = new Node() { ID = counter, nodeType = Random.Range(0, 3), NodeColor = Color.blue, NodePos = new Vector2(0, N_layers) };
+        var node_end = new Node() { ID = counter, nodeType = Random.Range(0, Nnodetype), NodeColor = Color.blue, NodePos = new Vector2(0, N_layers) };
         graph.Nodes.Add(node_end);
         // create edges layer wise from bottom up
         foreach (Node node in graph.Layers[0])
@@ -320,7 +335,7 @@ public class GraphComponents : MonoBehaviour
         // save graph to playerprefs
         foreach (Node node in graph.Nodes)
         {
-            savenodes += System.Convert.ToString(node.nodeType) + System.Convert.ToString(node.NodePos);
+            savenodes += System.Convert.ToString(node.nodeType)+"_" + System.Convert.ToString(node.NodePos);
         }
         PlayerPrefs.SetString("nodelist", savenodes);
         foreach(Edge edge in graph.Edges)
@@ -333,12 +348,15 @@ public class GraphComponents : MonoBehaviour
 
     void loadGraph()
     {
+        lastselected = PlayerPrefs.GetInt("lastselected");
+        currentLayer = PlayerPrefs.GetFloat("cam_pos");
+        camera.transform.position = new Vector3(0, PlayerPrefs.GetFloat("cam_pos"), -2);
         GameObject[] allObjects = GameObject.FindGameObjectsWithTag("clone");
         foreach (GameObject obj in allObjects)
         {
             DestroyImmediate(obj);
         }
-        // load payerpref nodes and convert
+        // load playerpref nodes and convert
         var igotthis = PlayerPrefs.GetString("nodelist");
         string mystring = "";
         bool startentry = true;
@@ -349,9 +367,15 @@ public class GraphComponents : MonoBehaviour
         {
             if (startentry)
             {
-                mystring += c;
-                LoadNodeType.Add(System.Int32.Parse(mystring));
-                startentry = false;
+                if (c != '_')
+                {
+                    mystring += c;
+                }
+                else
+                {
+                    LoadNodeType.Add(System.Int32.Parse(mystring));
+                    startentry = false;
+                }
             }
             else
             {
@@ -362,7 +386,7 @@ public class GraphComponents : MonoBehaviour
                 else { mystring += c; }
             }
         }
-        // load payerpref edges and convert
+        // load playerpref edges and convert
         igotthis = PlayerPrefs.GetString("edgelist");
         mystring = "";
         int int1=0;
@@ -373,36 +397,45 @@ public class GraphComponents : MonoBehaviour
             else if (c == '_') { int2 = System.Int32.Parse(mystring); mystring = ""; LoadEdges.Add(new Vector2(int1, int2)); }
             else { mystring += c; }
         }
+        // load lpayerpref chosen edges and convert
+        igotthis = PlayerPrefs.GetString("chosenedgessaved");
+        mystring = "";
+        int1 = 0;
+        foreach (char c in igotthis)
+        {
+            if (c == ',') { int1 = System.Int32.Parse(mystring); mystring = ""; }
+            else if (c == '_') { int2 = System.Int32.Parse(mystring); mystring = ""; LoadChosenEdges.Add(new Vector2(int1, int2)); }
+            else { mystring += c; }
+        }
         // create objects of graph
         int nodeID = 0;
         foreach(int nodetype in LoadNodeType)
         {
-            switch (nodetype)
+            if (nodetype < 4)
             {
-                case 0:
-                    if (nodetype == 0) { Instantiate(cube0, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 1) { Instantiate(cube1, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 2) { Instantiate(cube2, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 3) { Instantiate(cube3, LoadNodePos[nodeID], Quaternion.identity); }
-                    break;
-                case 1:
-                    if (nodetype == 0) { Instantiate(sphere0, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 1) { Instantiate(sphere1, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 2) { Instantiate(sphere2, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 3) { Instantiate(sphere3, LoadNodePos[nodeID], Quaternion.identity); }
-                    break;
-                case 2:
-                    if (nodetype == 0) { Instantiate(triang0, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 1) { Instantiate(triang1, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 2) { Instantiate(triang2, LoadNodePos[nodeID], Quaternion.identity); }
-                    else if (nodetype == 3) { Instantiate(triang3, LoadNodePos[nodeID], Quaternion.identity); }
-                    break;
-                default:
-                    break;
+                if (nodetype == 0) { Instantiate(cube0, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 1) { Instantiate(cube1, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 2) { Instantiate(cube2, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 3) { Instantiate(cube3, LoadNodePos[nodeID], Quaternion.identity); }
             }
-
+            else if (nodetype < 8)
+            {
+                if (nodetype == 4) { Instantiate(sphere0, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 5) { Instantiate(sphere1, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 6) { Instantiate(sphere2, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 7) { Instantiate(sphere3, LoadNodePos[nodeID], Quaternion.identity); }
+            }
+            else if (nodetype < 12)
+            {
+                if (nodetype == 8) { Instantiate(triang0, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 9) { Instantiate(triang1, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 10) { Instantiate(triang2, LoadNodePos[nodeID], Quaternion.identity); }
+                else if (nodetype == 11) { Instantiate(triang3, LoadNodePos[nodeID], Quaternion.identity); }
+            }
+            else { Debug.Log("So einen Knoten gibt's doch gar nicht?!"); }
             nodeID += 1;
         }
+
         GameObject[] allObjects2 = GameObject.FindGameObjectsWithTag("clone");
         foreach (GameObject obj in allObjects2)
         {
@@ -453,15 +486,37 @@ public class GraphComponents : MonoBehaviour
             else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1, temp1, Quaternion.identity); }
             else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2, temp1, Quaternion.identity); }
         }
+        foreach (Vector2 connection in LoadChosenEdges)
+        {
+            Debug.Log(connection[0]);
+            Debug.Log(connection[1]);
+            Debug.Log(".-.-.");
+
+            var temp1 = LoadNodePos[(int)connection[0]];
+            var temp2 = LoadNodePos[(int)connection[1]];
+            if (temp1[1] > temp2[1])
+            {
+                temp2 = LoadNodePos[(int)connection[0]];
+                temp1 = LoadNodePos[(int)connection[1]];
+            }
+            var diff = temp1[0] - temp2[0];
+            if (0.01f > diff && diff > -0.01f) { Instantiate(Cylindernew, temp1, Quaternion.identity); }
+            else if (0.01f + 0.5f > diff && diff > -0.01f + 0.5f) { Instantiate(Cylinder3new, temp1, Quaternion.identity); }
+            else if (0.01f + 1 > diff && diff > -0.01f + 1) { Instantiate(Cylinder4new, temp1, Quaternion.identity); }
+            else if (0.01f + 1.5 > diff && diff > -0.01f + 1.5) { Instantiate(Cylinder5new, temp1, Quaternion.identity); }
+            else if (0.01f - 0.5f > diff && diff > -0.01f - 0.5f) { Instantiate(Cylinder0new, temp1, Quaternion.identity); }
+            else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1new, temp1, Quaternion.identity); }
+            else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2new, temp1, Quaternion.identity); }
+        }
     }
     // Start is called before the first frame update
     void Start()
     {
-        camera.transform.position = new Vector3(0, 0.5f, -2);
         currentLayer = 0.5f;
         IDcounter = -1;
         LoadNodePos = new List<Vector2>();
         LoadEdges = new List<Vector2>();
+        LoadChosenEdges = new List<Vector2>();
         LoadNodeType = new List<int>();
         savenodes = "";
         saveedges = ""; savechosenedges = "";
@@ -495,6 +550,7 @@ public class GraphComponents : MonoBehaviour
         else
         {
             camera.transform.position = new Vector3(0, currentLayer, -2);
+            //SceneManager.LoadScene("test");
         }
 
     }
