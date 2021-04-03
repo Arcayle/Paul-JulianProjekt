@@ -13,7 +13,10 @@ public class GraphComponents : MonoBehaviour
     public float currentLayer = 1;
     public int lastselected;
     public int counter = 1;
-
+    public List<Vector2> LoadNodePos, LoadEdges;
+    public List<int> LoadNodeType;
+    public string savenodes="";
+    public string saveedges="", savechosenedges ="";
     public int mymethod() 
     {
         IDcounter += 1;
@@ -22,33 +25,25 @@ public class GraphComponents : MonoBehaviour
     public void moveCam()
     {
         currentLayer += 1;
-        Debug.Log("Current hoch");
-        
     }
     public bool validClick(int ID)
     {     
-        foreach (Edge edge in graph.Edges)
+        foreach (Vector2 connection in LoadEdges)
         {
             
-            if (edge.LeftNode.ID== ID)
+            if (connection[0]== ID)
             {
-                Debug.Log("---");
-                Debug.Log(edge.LeftNode.ID);
-                Debug.Log(edge.RightNode.ID);
-                Debug.Log("---");
-                if (edge.RightNode.ID == lastselected)
+                if (connection[1] == lastselected)
                 {
-                    
                     lastselected = ID;
-                    var temp1 = edge.LeftNode.NodePos;
-                    var temp2 = edge.RightNode.NodePos;
+                    var temp1 = LoadNodePos[(int)connection[0]];
+                    var temp2 = LoadNodePos[(int)connection[1]];
                     if (temp1[1] > temp2[1])
                     {
-                        temp2 = edge.LeftNode.NodePos;
-                        temp1 = edge.RightNode.NodePos;
+                        temp2 = LoadNodePos[(int)connection[0]];
+                        temp1 = LoadNodePos[(int)connection[1]];
                     }
                     var diff = temp1[0] - temp2[0];
-
                     if (0.01f > diff && diff > -0.01f) { Instantiate(Cylindernew, temp1, Quaternion.identity);}
                     else if (0.01f + 0.5f > diff && diff > -0.01f + 0.5f) { Instantiate(Cylinder3new, temp1, Quaternion.identity);}
                     else if (0.01f + 1 > diff && diff > -0.01f + 1) { Instantiate(Cylinder4new, temp1, Quaternion.identity);}
@@ -56,28 +51,22 @@ public class GraphComponents : MonoBehaviour
                     else if (0.01f - 0.5f > diff && diff > -0.01f - 0.5f) { Instantiate(Cylinder0new, temp1, Quaternion.identity);}
                     else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1new, temp1, Quaternion.identity);}
                     else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2new, temp1, Quaternion.identity);}
-                        return true;
+                    return true;
                 }
             }
-            else if(edge.RightNode.ID == ID)
+            else if(connection[1]== ID)
             {
-                Debug.Log("---");
-                Debug.Log(edge.LeftNode.ID);
-                Debug.Log(edge.RightNode.ID);
-                Debug.Log("---");
-                if (edge.LeftNode.ID ==lastselected)
+                if (connection[0] ==lastselected)
                 {
                     lastselected = ID;
-
-                    var temp1 = edge.LeftNode.NodePos;
-                    var temp2 = edge.RightNode.NodePos;
+                    var temp1 = LoadNodePos[(int)connection[0]];
+                    var temp2 = LoadNodePos[(int)connection[1]];
                     if (temp1[1] > temp2[1])
                     {
-                        temp2 = edge.LeftNode.NodePos;
-                        temp1 = edge.RightNode.NodePos;
+                        temp2 = LoadNodePos[(int)connection[0]];
+                        temp1 = LoadNodePos[(int)connection[1]];
                     }
                     var diff = temp1[0] - temp2[0];
-
                     if (0.01f > diff && diff > -0.01f) { Instantiate(Cylindernew, temp1, Quaternion.identity);}
                     else if (0.01f + 0.5f > diff && diff > -0.01f + 0.5f) { Instantiate(Cylinder3new, temp1, Quaternion.identity);}
                     else if (0.01f + 1 > diff && diff > -0.01f + 1) { Instantiate(Cylinder4new, temp1, Quaternion.identity);}
@@ -85,49 +74,37 @@ public class GraphComponents : MonoBehaviour
                     else if (0.01f - 0.5f > diff && diff > -0.01f - 0.5f) { Instantiate(Cylinder0new, temp1, Quaternion.identity);}
                     else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1new, temp1, Quaternion.identity);}
                     else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2new, temp1, Quaternion.identity);}
-
-
                     return true;
                 }
             }
         }
-   
         return false;
-    
-
     }
-
-    // Start is called before the first frame update
-    void Start()
+    public void resetGraph()
     {
-        
-        camera.transform.position = new Vector3(0, 0f, -2);
-        currentLayer = 0.5f;
-        IDcounter = -1;
-        GameObject[] allObjects = GameObject.FindGameObjectsWithTag("clone");
-        foreach (GameObject obj in allObjects)
-        {
-            DestroyImmediate(obj);
-        }
+        PlayerPrefs.SetInt("graphsaved", 1);
+        Start();
+    }
+    void createGraph()
+    {
         int N_layers = 10;
         List<Color> colorlist = new List<Color>();
         colorlist.Add(Color.blue);
         colorlist.Add(Color.red);
         colorlist.Add(Color.yellow);
         colorlist.Add(Color.magenta);
-
-        bool SameNodes =false;
-        int nodeType=0;
+        bool SameNodes = false;
+        int nodeType = 0;
         int color = 0;
         graph = new Graph();
-        var node_start = new Node() { ID = 0 ,NodeColor = Color.magenta, nodeType = Random.Range(0, 3), NodePos = Vector2.zero };
+        var node_start = new Node() { ID = 0, NodeColor = Color.magenta, nodeType = Random.Range(0, 3), NodePos = Vector2.zero };
         graph.Nodes.Add(node_start);
         lastselected = 0;
         // create nodes layer wise and store layers
         int counter = 1;
         for (var i = 1; i < N_layers; i++)
         {
-            int rValue = Random.Range(0,100);   
+            int rValue = Random.Range(0, 100);
             int N_nodes;
             if (rValue < 25) N_nodes = 2;
             else if (rValue < 60) N_nodes = 3;
@@ -136,17 +113,17 @@ public class GraphComponents : MonoBehaviour
             List<Node> NodesInLayer = new List<Node>();
             if (Random.Range(0, 5) == 1) { SameNodes = true; color = Random.Range(0, 4); nodeType = Random.Range(0, 3); }
             else SameNodes = false;
-            for (var j = 0; j < N_nodes; j++) 
+            for (var j = 0; j < N_nodes; j++)
             {
                 if (SameNodes == true)
                 {
-                    var temp = new Node() { ID=counter,nodeType=nodeType, NodeColor = colorlist[color], NodePos = new Vector2((float)j - 0.5f * (N_nodes - 1) + Random.Range(-1, 2) * 0.0f, i + Random.Range(-1, 2) * 0.0f) };
+                    var temp = new Node() { ID = counter, nodeType = nodeType, NodeColor = colorlist[color], NodePos = new Vector2((float)j - 0.5f * (N_nodes - 1) + Random.Range(-1, 2) * 0.0f, i + Random.Range(-1, 2) * 0.0f) };
                     NodesInLayer.Add(temp);
                     graph.Nodes.Add(temp);
                 }
                 else
                 {
-                    var temp = new Node() { ID = counter, nodeType = Random.Range(0, 3), NodeColor = colorlist[Random.Range(0,4)], NodePos = new Vector2((float)j-0.5f*(N_nodes-1)+Random.Range(-1,2)*0.0f, i + Random.Range(-1, 2) * 0.0f) };
+                    var temp = new Node() { ID = counter, nodeType = Random.Range(0, 3), NodeColor = colorlist[Random.Range(0, 4)], NodePos = new Vector2((float)j - 0.5f * (N_nodes - 1) + Random.Range(-1, 2) * 0.0f, i + Random.Range(-1, 2) * 0.0f) };
                     NodesInLayer.Add(temp);
                     graph.Nodes.Add(temp);
                 }
@@ -154,21 +131,20 @@ public class GraphComponents : MonoBehaviour
             }
             graph.Layers.Add(NodesInLayer);
         }
-        var node_end = new Node() { ID = counter, nodeType = Random.Range(0, 3), NodeColor = Color.blue, NodePos = new Vector2(0,N_layers) };
+        var node_end = new Node() { ID = counter, nodeType = Random.Range(0, 3), NodeColor = Color.blue, NodePos = new Vector2(0, N_layers) };
         graph.Nodes.Add(node_end);
         // create edges layer wise from bottom up
         foreach (Node node in graph.Layers[0])
         {
             Edge conn = new Edge() { LeftNode = node_start, RightNode = node, EdgeColor = Color.black };
             graph.Edges.Add(conn);
-
         }
-        for (int i = 0; i < N_layers-2; i++)
+        for (int i = 0; i < N_layers - 2; i++)
         {   // outer edges
             var layer = graph.Layers[i];
-            var nextlayer = graph.Layers[i+1];
+            var nextlayer = graph.Layers[i + 1];
             Edge outer1 = new Edge() { LeftNode = layer[0], RightNode = nextlayer[0], EdgeColor = Color.black };
-            Edge outer2 = new Edge() { LeftNode = layer[graph.NodesPerLayer[i] - 1], RightNode = nextlayer[graph.NodesPerLayer[i+1]- 1], EdgeColor = Color.black };
+            Edge outer2 = new Edge() { LeftNode = layer[graph.NodesPerLayer[i] - 1], RightNode = nextlayer[graph.NodesPerLayer[i + 1] - 1], EdgeColor = Color.black };
             nextlayer[graph.NodesPerLayer[i + 1] - 1].Connected = graph.NodesPerLayer[i] - 1;
             layer[graph.NodesPerLayer[i] - 1].Connected = graph.NodesPerLayer[i + 1] - 1;
             nextlayer[0].Connected = 0;
@@ -177,7 +153,7 @@ public class GraphComponents : MonoBehaviour
             graph.Edges.Add(outer2);
             int diff = graph.NodesPerLayer[i] - graph.NodesPerLayer[i + 1];
             if (diff != 0)
-            {   
+            {
                 if (diff < 0)
                 {   //flip
                     List<Node> temp = nextlayer;
@@ -185,7 +161,7 @@ public class GraphComponents : MonoBehaviour
                     layer = temp;
                 }
                 // start connecting from left 
-                int posi = Random.Range(0, 1+1);
+                int posi = Random.Range(0, 1 + 1);
                 Edge inner1 = new Edge() { LeftNode = layer[1], RightNode = nextlayer[posi], EdgeColor = Color.black };
                 graph.Edges.Add(inner1);
                 nextlayer[posi].Connected = 1;
@@ -213,7 +189,7 @@ public class GraphComponents : MonoBehaviour
                         // choose between neighboring connections
                         if (done == false)
                         {
-                            int min = layer[nodepos-1].Connected;
+                            int min = layer[nodepos - 1].Connected;
                             int max = layer[nodepos + 1].Connected;
                             int posi2 = Random.Range(min, max + 1);
                             Edge inner3 = new Edge() { LeftNode = node, RightNode = nextlayer[posi2], EdgeColor = Color.black };
@@ -231,7 +207,7 @@ public class GraphComponents : MonoBehaviour
                     int which = Random.Range(0, 3);
                     Node node = layer[which];
                     if (which == 1)
-                    {   
+                    {
                         int nextnodepos = Random.Range(0, 2) * 2;
                         Edge conn = new Edge() { LeftNode = node, RightNode = nextlayer[nextnodepos], EdgeColor = Color.black };
                         graph.Edges.Add(conn);
@@ -250,7 +226,7 @@ public class GraphComponents : MonoBehaviour
                     {
                         if (n.Connected == 100)
                         {   // choose between neighboring connections
-                            int nextnodepos=Random.Range(layer[nodepos - 1].Connected, layer[nodepos + 1].Connected+1);
+                            int nextnodepos = Random.Range(layer[nodepos - 1].Connected, layer[nodepos + 1].Connected + 1);
                             Edge inner = new Edge() { LeftNode = n, RightNode = nextlayer[nextnodepos], EdgeColor = Color.black };
                             graph.Edges.Add(inner);
                             node.Connected = nextnodepos;
@@ -283,10 +259,10 @@ public class GraphComponents : MonoBehaviour
                         graph.Edges.Add(conn);
                         nextlayer[which].Connected = which;
                         int randi = Random.Range(0, 2) * 2 - 1;
-                        Edge conn2 = new Edge() { LeftNode = node, RightNode = nextlayer[which+randi], EdgeColor = Color.black };
+                        Edge conn2 = new Edge() { LeftNode = node, RightNode = nextlayer[which + randi], EdgeColor = Color.black };
                         graph.Edges.Add(conn2);
-                        if (which == 1){node.Connected = System.Math.Max(which, which + randi);}
-                        else{node.Connected = System.Math.Min(which, which + randi);}
+                        if (which == 1) { node.Connected = System.Math.Max(which, which + randi); }
+                        else { node.Connected = System.Math.Min(which, which + randi); }
                     }
                     int nodepos = 0;
                     // connect remaining nodes from layer
@@ -298,7 +274,7 @@ public class GraphComponents : MonoBehaviour
                             int nextnodepos = 0;
                             // force connect if next layer has unconnected nodes
                             foreach (Node next in nextlayer)
-                            {   
+                            {
                                 if (next.Connected == 100)
                                 {
                                     Edge inner = new Edge() { LeftNode = n, RightNode = next, EdgeColor = Color.black };
@@ -310,17 +286,17 @@ public class GraphComponents : MonoBehaviour
                                 nextnodepos += 1;
                             }
                             // neighbor has no connection yet
-                            if (layer[nodepos + 1].Connected >3&&done==false)
+                            if (layer[nodepos + 1].Connected > 3 && done == false)
                             {
-                                nextnodepos = Random.Range(layer[nodepos - 1].Connected, layer[nodepos - 1].Connected+2);
+                                nextnodepos = Random.Range(layer[nodepos - 1].Connected, layer[nodepos - 1].Connected + 2);
                                 Edge inner = new Edge() { LeftNode = n, RightNode = nextlayer[nextnodepos], EdgeColor = Color.black };
                                 graph.Edges.Add(inner);
                                 node.Connected = nextnodepos;
                                 nextlayer[nextnodepos].Connected = nodepos;
                             }
-                            else if (done==false)
+                            else if (done == false)
                             {
-                                nextnodepos = Random.Range(layer[nodepos - 1].Connected, layer[nodepos + 1].Connected+1);
+                                nextnodepos = Random.Range(layer[nodepos - 1].Connected, layer[nodepos + 1].Connected + 1);
                                 Edge inner = new Edge() { LeftNode = n, RightNode = nextlayer[nextnodepos], EdgeColor = Color.black };
                                 graph.Edges.Add(inner);
                                 node.Connected = nextnodepos;
@@ -332,8 +308,8 @@ public class GraphComponents : MonoBehaviour
                 }
             }
             // reset connections
-            foreach (Node node in nextlayer){node.Connected = 100;}
-            foreach (Node node in layer){node.Connected = 100;}
+            foreach (Node node in nextlayer) { node.Connected = 100; }
+            foreach (Node node in layer) { node.Connected = 100; }
         }
         // connect boss node
         foreach (Node node in graph.Layers[N_layers - 2])
@@ -341,8 +317,98 @@ public class GraphComponents : MonoBehaviour
             Edge conn = new Edge() { LeftNode = node, RightNode = node_end, EdgeColor = Color.black };
             graph.Edges.Add(conn);
         }
+        // save graph to playerprefs
+        foreach (Node node in graph.Nodes)
+        {
+            savenodes += System.Convert.ToString(node.nodeType) + System.Convert.ToString(node.NodePos);
+        }
+        PlayerPrefs.SetString("nodelist", savenodes);
+        foreach(Edge edge in graph.Edges)
+        {
+            saveedges += System.Convert.ToString(edge.LeftNode.ID) +","+ System.Convert.ToString(edge.RightNode.ID)+"_";
+        }
+        PlayerPrefs.SetString("edgelist", saveedges);
+        PlayerPrefs.SetInt("graphsaved", 2);
+    }
 
-        foreach(Node node in graph.Nodes)
+    void loadGraph()
+    {
+        GameObject[] allObjects = GameObject.FindGameObjectsWithTag("clone");
+        foreach (GameObject obj in allObjects)
+        {
+            DestroyImmediate(obj);
+        }
+        // load payerpref nodes and convert
+        var igotthis = PlayerPrefs.GetString("nodelist");
+        string mystring = "";
+        bool startentry = true;
+        int commas = 0;
+        float float1=0; 
+        float float2;
+        foreach (char c in igotthis)
+        {
+            if (startentry)
+            {
+                mystring += c;
+                LoadNodeType.Add(System.Int32.Parse(mystring));
+                startentry = false;
+            }
+            else
+            {
+                if (c == '(' | c == ' ') { mystring = ""; }
+                else if (c == ',' && commas < 1) { commas += 1; mystring += c; }
+                else if (c == ',' && commas == 1) { float1 = float.Parse(mystring); commas = 0; mystring = ""; }
+                else if (c == ')') { float2 = float.Parse(mystring); commas = 0; mystring = ""; startentry = true; LoadNodePos.Add(new Vector2(float1, float2)); }
+                else { mystring += c; }
+            }
+        }
+        // load payerpref edges and convert
+        igotthis = PlayerPrefs.GetString("edgelist");
+        mystring = "";
+        int int1=0;
+        int int2;
+        foreach (char c in igotthis)
+        {
+            if (c == ',') { int1 = System.Int32.Parse(mystring); mystring = ""; }
+            else if (c == '_') { int2 = System.Int32.Parse(mystring); mystring = ""; LoadEdges.Add(new Vector2(int1, int2)); }
+            else { mystring += c; }
+        }
+        // create objects of graph
+        int nodeID = 0;
+        foreach(int nodetype in LoadNodeType)
+        {
+            switch (nodetype)
+            {
+                case 0:
+                    if (nodetype == 0) { Instantiate(cube0, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 1) { Instantiate(cube1, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 2) { Instantiate(cube2, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 3) { Instantiate(cube3, LoadNodePos[nodeID], Quaternion.identity); }
+                    break;
+                case 1:
+                    if (nodetype == 0) { Instantiate(sphere0, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 1) { Instantiate(sphere1, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 2) { Instantiate(sphere2, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 3) { Instantiate(sphere3, LoadNodePos[nodeID], Quaternion.identity); }
+                    break;
+                case 2:
+                    if (nodetype == 0) { Instantiate(triang0, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 1) { Instantiate(triang1, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 2) { Instantiate(triang2, LoadNodePos[nodeID], Quaternion.identity); }
+                    else if (nodetype == 3) { Instantiate(triang3, LoadNodePos[nodeID], Quaternion.identity); }
+                    break;
+                default:
+                    break;
+            }
+
+            nodeID += 1;
+        }
+        GameObject[] allObjects2 = GameObject.FindGameObjectsWithTag("clone");
+        foreach (GameObject obj in allObjects2)
+        {
+            obj.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        }
+        /*foreach (Node node in graph.Nodes)
         {
             switch (node.nodeType)
             {
@@ -353,70 +419,74 @@ public class GraphComponents : MonoBehaviour
                     else if (node.NodeColor == Color.magenta) { Instantiate(cube3, node.NodePos, Quaternion.identity); }
                     break;
                 case 1:
-                    if (node.NodeColor == Color.blue) {Instantiate(sphere0, node.NodePos, Quaternion.identity); }
-                    else if (node.NodeColor == Color.red) {  Instantiate(sphere1, node.NodePos, Quaternion.identity); }
+                    if (node.NodeColor == Color.blue) { Instantiate(sphere0, node.NodePos, Quaternion.identity); }
+                    else if (node.NodeColor == Color.red) { Instantiate(sphere1, node.NodePos, Quaternion.identity); }
                     else if (node.NodeColor == Color.yellow) { Instantiate(sphere2, node.NodePos, Quaternion.identity); }
                     else if (node.NodeColor == Color.magenta) { Instantiate(sphere3, node.NodePos, Quaternion.identity); }
                     break;
                 case 2:
-                    if (node.NodeColor == Color.blue) {Instantiate(triang0, node.NodePos, Quaternion.identity); }
+                    if (node.NodeColor == Color.blue) { Instantiate(triang0, node.NodePos, Quaternion.identity); }
                     else if (node.NodeColor == Color.red) { Instantiate(triang1, node.NodePos, Quaternion.identity); }
-                    else if (node.NodeColor == Color.yellow) {  Instantiate(triang2, node.NodePos, Quaternion.identity); }
-                    else if (node.NodeColor == Color.magenta) {Instantiate(triang3, node.NodePos, Quaternion.identity); }
+                    else if (node.NodeColor == Color.yellow) { Instantiate(triang2, node.NodePos, Quaternion.identity); }
+                    else if (node.NodeColor == Color.magenta) { Instantiate(triang3, node.NodePos, Quaternion.identity); }
                     break;
                 default:
                     break;
             }
-            
-        }
-        GameObject[] allObjects2 = GameObject.FindGameObjectsWithTag("clone");
-        foreach (GameObject obj in allObjects2)
+
+        }*/
+        foreach (Vector2 connection in LoadEdges)
         {
-            obj.transform.localScale=new Vector3(0.2f,0.2f,0.2f);
-        }
-        foreach (Edge edge in graph.Edges)
-        {
-            var temp1 = edge.LeftNode.NodePos;
-            var temp2 = edge.RightNode.NodePos;
-            if (temp1[1] > temp2[1]) {
-                temp2 = edge.LeftNode.NodePos;
-                temp1 = edge.RightNode.NodePos;
+            var temp1 = LoadNodePos[(int)connection[0]];
+            var temp2 = LoadNodePos[(int)connection[1]];
+            if (temp1[1] > temp2[1])
+            {
+                temp2 = LoadNodePos[(int)connection[0]];
+                temp1 = LoadNodePos[(int)connection[1]];
             }
             var diff = temp1[0] - temp2[0];
-            if (0.01f>diff && diff>-0.01f) { Instantiate(Cylinder, temp1, Quaternion.identity); }
-            else if (0.01f+0.5f > diff && diff > -0.01f+0.5f) { Instantiate(Cylinder3, temp1, Quaternion.identity); }
-            else if (0.01f+1 > diff && diff > -0.01f+1) { Instantiate(Cylinder4, temp1, Quaternion.identity); }
-            else if (0.01f+1.5 > diff && diff > -0.01f+1.5) { Instantiate(Cylinder5, temp1, Quaternion.identity); }
-            else if (0.01f - 0.5f > diff && diff > -0.01f- 0.5f) { Instantiate(Cylinder0, temp1, Quaternion.identity); }
+            if (0.01f > diff && diff > -0.01f) { Instantiate(Cylinder, temp1, Quaternion.identity); }
+            else if (0.01f + 0.5f > diff && diff > -0.01f + 0.5f) { Instantiate(Cylinder3, temp1, Quaternion.identity); }
+            else if (0.01f + 1 > diff && diff > -0.01f + 1) { Instantiate(Cylinder4, temp1, Quaternion.identity); }
+            else if (0.01f + 1.5 > diff && diff > -0.01f + 1.5) { Instantiate(Cylinder5, temp1, Quaternion.identity); }
+            else if (0.01f - 0.5f > diff && diff > -0.01f - 0.5f) { Instantiate(Cylinder0, temp1, Quaternion.identity); }
             else if (0.01f - 1 > diff && diff > -0.01f - 1) { Instantiate(Cylinder1, temp1, Quaternion.identity); }
             else if (0.01f - 1.5 > diff && diff > -0.01f - 1.5) { Instantiate(Cylinder2, temp1, Quaternion.identity); }
         }
-        
-        foreach (Node node in graph.Nodes)
-        {
-            Debug.Log("---");
-            Debug.Log(node.ID);
-            Debug.Log("---");
+    }
+    // Start is called before the first frame update
+    void Start()
+    {
+        camera.transform.position = new Vector3(0, 0.5f, -2);
+        currentLayer = 0.5f;
+        IDcounter = -1;
+        LoadNodePos = new List<Vector2>();
+        LoadEdges = new List<Vector2>();
+        LoadNodeType = new List<int>();
+        savenodes = "";
+        saveedges = ""; savechosenedges = "";
+        if (PlayerPrefs.HasKey("graphsaved")){
+            if (PlayerPrefs.GetInt("graphsaved") == 1)
+            {
+                createGraph();
+                loadGraph();
+            }
+            else if (PlayerPrefs.GetInt("graphsaved") == 2)
+            {
+                loadGraph();
+            }
         }
-        /*
-        foreach (Edge edge in graph.Edges)
+        else
         {
-            Debug.Log("---");
-            Debug.Log(edge.LeftNode.ID);
-            Debug.Log(edge.RightNode.ID);
-            Debug.Log("---");
+            createGraph();
+            loadGraph();
         }
-        */
     }
 
 
     // Update is called once per frame
     void Update()
     {
-        if (graph == null)
-        {
-            Start();
-        }
         if (camera.transform.position.y < currentLayer)
         {
 
