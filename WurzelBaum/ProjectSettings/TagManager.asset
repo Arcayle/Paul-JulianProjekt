@@ -6,6 +6,10 @@ TagManager:
   tags:
   - clone
   - mainscript
+  - 5g
+  - 10g
+  - 25g
+  - mainscript_huhn
   layers:
   - Default
   - TransparentFX
