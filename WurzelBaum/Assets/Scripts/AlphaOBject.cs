@@ -11,7 +11,7 @@ public class AlphaOBject : MonoBehaviour
     {
   
 
-            sprite.alphaHitTestMinimumThreshold = 0.05f;
+            sprite.alphaHitTestMinimumThreshold = 0.0001f;
        
     }
 }

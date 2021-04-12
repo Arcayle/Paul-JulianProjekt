@@ -32,6 +32,10 @@ public class hohrmuhn : MonoBehaviour
         }
 
     }
+    public void schieﬂnicht()
+    {
+        Debug.Log("schieﬂnich");
+    }
     private void Awake()
     {
         myinput = new InputSetting();
