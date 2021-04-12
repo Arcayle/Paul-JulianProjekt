@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 public class hohrmuhn : MonoBehaviour
 {
@@ -51,6 +53,7 @@ public class hohrmuhn : MonoBehaviour
 
 
     }
+
     public void ballern(InputAction.CallbackContext context)
     {   
         if (context.performed)
@@ -58,8 +61,43 @@ public class hohrmuhn : MonoBehaviour
             if (loadactive == false && ammo > 0)
             {
                 ammo += -1;
+
+                RaycastHit[] hits;
+
                 var mouseposition = Mouse.current.position.ReadValue();//myinput.Moorhuhn.getMouse.ReadValue<Vector2>();
                 Ray ray = camera.ScreenPointToRay(mouseposition);
+                /*
+                hits = Physics.RaycastAll(ray, 100.0F);
+                
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    
+                    RaycastHit hitneu = hits[i];
+                    
+                    var col = hitneu.collider;
+                    SpriteRenderer rend = hitneu.transform.GetComponent<SpriteRenderer>();
+
+                    Texture2D tex = rend.sprite.texture as Texture2D;
+
+                    if (tex != null)
+                    {
+                        var xInTex = (int)(hitneu.textureCoord.x * tex.width);
+                        var yInTex = (int)(hitneu.textureCoord.y * tex.height);
+                        var pix = tex.GetPixel(xInTex, yInTex);
+                        if (pix.a > 0)
+                        {
+                            //Debug.Log("You hit: " + col.name + " position " + h.textureCoord.x + " , " + h.textureCoord.y);
+                            Debug.Log("neuesRaycastetest");
+
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("ich bin eine null");
+                    }
+                    
+                }
+                */
                 Debug.Log(System.Convert.ToString(mouseposition));
 
 
