@@ -10,6 +10,7 @@ TagManager:
   - 10g
   - 25g
   - mainscript_huhn
+  - terrain
   layers:
   - Default
   - TransparentFX

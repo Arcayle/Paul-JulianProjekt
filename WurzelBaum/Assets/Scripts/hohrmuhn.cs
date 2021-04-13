@@ -22,6 +22,7 @@ public class hohrmuhn : MonoBehaviour
     public int cam_direction;
     public Vector3 campos;
     public int cam_speed;
+    public bool schiessnicht;
     public void reload()
     {
         if (loadactive == false)
@@ -34,32 +35,17 @@ public class hohrmuhn : MonoBehaviour
     }
     public void schießnicht()
     {
-        Debug.Log("schießnich");
+        schiessnicht = true;
     }
     private void Awake()
     {
         myinput = new InputSetting();
     }
-    private void OnEnable()
-    {
-        myinput.Moorhuhn.Enable();
-        myinput.Moorhuhn.Ballern.Enable();
-        myinput.Moorhuhn.getMouse.Enable();
-
-
-    }
-
-    private void OnDisable()
-    {
-        myinput.Moorhuhn.Disable();
-        myinput.Moorhuhn.Ballern.Disable();
-        myinput.Moorhuhn.getMouse.Disable();
-
-
-    }
+   
 
     public void ballern(InputAction.CallbackContext context)
-    {   
+    {
+        
         if (context.performed)
         {
             if (loadactive == false && ammo > 0)
@@ -67,64 +53,38 @@ public class hohrmuhn : MonoBehaviour
                 ammo += -1;
 
                 RaycastHit[] hits;
-
                 var mouseposition = Mouse.current.position.ReadValue();//myinput.Moorhuhn.getMouse.ReadValue<Vector2>();
                 Ray ray = camera.ScreenPointToRay(mouseposition);
-                /*
                 hits = Physics.RaycastAll(ray, 100.0F);
-                
                 for (int i = 0; i < hits.Length; i++)
                 {
-                    
                     RaycastHit hitneu = hits[i];
-                    
-                    var col = hitneu.collider;
-                    SpriteRenderer rend = hitneu.transform.GetComponent<SpriteRenderer>();
-
-                    Texture2D tex = rend.sprite.texture as Texture2D;
-
-                    if (tex != null)
-                    {
-                        var xInTex = (int)(hitneu.textureCoord.x * tex.width);
-                        var yInTex = (int)(hitneu.textureCoord.y * tex.height);
-                        var pix = tex.GetPixel(xInTex, yInTex);
-                        if (pix.a > 0)
-                        {
-                            //Debug.Log("You hit: " + col.name + " position " + h.textureCoord.x + " , " + h.textureCoord.y);
-                            Debug.Log("neuesRaycastetest");
-
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log("ich bin eine null");
-                    }
-                    
+                    var obj = hitneu.transform;
+                    Debug.Log(i);
+                    if (obj) { Debug.Log("ich existiere");}
+                    if (obj.gameObject.tag == "terrain") { schiessnicht = true; Debug.Log("ich bin die wüste"); }
                 }
-                */
-                Debug.Log(System.Convert.ToString(mouseposition));
-
-
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
-                {
-                    Debug.Log("PÄNG!");
-                    var obj = hit.transform;
-                    if (obj.gameObject.tag == "5g") { Destroy(obj.gameObject); score += 5; }
-                    else if (obj.gameObject.tag == "10g") { Destroy(obj.gameObject); score += 10; }
-                    else if (obj.gameObject.tag == "25g") { Destroy(obj.gameObject); score += 25; }
-
+                if (!schiessnicht)
+                {   
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        Debug.Log("PÄNG!");
+                        var obj = hits[i].transform;
+                        if (obj.gameObject.tag == "5g") { Destroy(obj.gameObject); score += 5; }
+                        else if (obj.gameObject.tag == "10g") { Destroy(obj.gameObject); score += 10; }
+                        else if (obj.gameObject.tag == "25g") { Destroy(obj.gameObject); score += 25; }
+                    }
                 }
+                    
                 scoretext.text = System.Convert.ToString(score);
                 ammotext.text = System.Convert.ToString(ammo);
-
                 Debug.Log("PENG!");
-
             }
             else
             {
                 Debug.Log("Keine Munition..");
             }
+            schiessnicht = false;
         }
         
     }
